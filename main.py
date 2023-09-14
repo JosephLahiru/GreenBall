@@ -15,34 +15,38 @@ while True:
     frame = imutils.resize(frame, width=600)
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    
-    mask = cv2.inRange(hsv, green_lower, green_upper)
-    
-    mask = cv2.erode(mask, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
-    
-    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    mask1 = cv2.inRange(hsv, green_lower, green_upper)
+    mask2 = cv2.erode(mask1, None, iterations=2)
+    mask3 = cv2.dilate(mask2, None, iterations=2)
+
+    cnts = cv2.findContours(
+        mask3.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     center = None
-    
+
     if len(cnts) > 0:
         c = max(cnts, key=cv2.contourArea)
         ((x, y), radius) = cv2.minEnclosingCircle(c)
-        
+
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        
+
         if radius > 10:
             cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
             cv2.circle(frame, center, 5, (0, 0, 255), -1)
-    
+
     pts.appendleft(center)
-    
+
     if center is not None:
         print("Current location: ({}, {})".format(center[0], center[1]))
-    
+
     cv2.imshow("Frame", frame)
-    
+    # cv2.imshow("HSV", hsv)
+    # cv2.imshow("MASK1", mask1)
+    # cv2.imshow("MASK2", mask2)
+    # cv2.imshow("MASK3", mask3)
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
